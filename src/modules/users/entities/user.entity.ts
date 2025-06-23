@@ -1,5 +1,14 @@
 import { Exclude } from 'class-transformer';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import { PersonalAccessToken } from 'src/modules/auth/entities/personal-access-token-entity';
+import {
+  Column,
+  CreateDateColumn,
+  DeleteDateColumn,
+  Entity,
+  OneToMany,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
 export enum Role {
   User = 'user',
@@ -23,4 +32,27 @@ export class User {
 
   @Column({ type: 'enum', enum: Role, default: Role.User, nullable: false })
   role: Role;
+
+  @Exclude()
+  @CreateDateColumn()
+  created_at: Date;
+
+  @Exclude()
+  @UpdateDateColumn()
+  updated_at: Date;
+
+  @Exclude()
+  @Column({ type: 'int', nullable: true })
+  created_by: number;
+
+  @Exclude()
+  @Column({ type: 'int', nullable: true })
+  updated_by: number;
+
+  @Exclude()
+  @DeleteDateColumn()
+  deleted_at: Date;
+
+  @OneToMany(() => PersonalAccessToken, (token) => token.user_id)
+  tokens: PersonalAccessToken[];
 }
