@@ -2,6 +2,7 @@ import {
   ConflictException,
   Inject,
   Injectable,
+  InternalServerErrorException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -13,6 +14,7 @@ import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
 import { BcryptService } from './hashing/bcrypt.service';
 import { instanceToInstance } from 'class-transformer';
 import { SignInDto } from './dto/login-dto';
+import { createHash, randomBytes } from 'crypto';
 
 @Injectable()
 export class AuthService {
@@ -46,6 +48,12 @@ export class AuthService {
 
   async login(sigInDto: SignInDto) {
     const user = await this.validateUser(sigInDto.email, sigInDto.password);
+    const token = await this.generateToken(user, 'Login token');
+    const safeUser = instanceToInstance(user);
+    return createResponse('success', 'Login Successfully', {
+      token,
+      user: safeUser,
+    });
   }
 
   async validateUser(email: string, password: string): Promise<User> {
@@ -54,5 +62,25 @@ export class AuthService {
     const isMatch = await this.bcryptService.compare(password, user.password);
     if (!isMatch) throw new UnauthorizedException('Invalid email or password');
     return user;
+  }
+  private async generateToken(
+    user: User,
+    tokenName = 'Login Token',
+  ): Promise<string> {
+    const plainToken = randomBytes(40).toString('hex');
+    const hashedToken = createHash('sha256').update(plainToken).digest('hex');
+
+    const accessToken = this.accessTokenRepository.create({
+      user_id: user.id,
+      name: tokenName,
+      token: hashedToken,
+      last_used_at: new Date(),
+    });
+    try {
+      await this.accessTokenRepository.save(accessToken);
+      return plainToken;
+    } catch {
+      throw new InternalServerErrorException('Failed to generate access token');
+    }
   }
 }
