@@ -1,26 +1,58 @@
-import { Injectable } from '@nestjs/common';
-import { CreateAuthDto } from './dto/create-auth.dto';
-import { UpdateAuthDto } from './dto/update-auth.dto';
+import {
+  ConflictException,
+  Inject,
+  Injectable,
+  UnauthorizedException,
+} from '@nestjs/common';
+import { InjectRepository } from '@nestjs/typeorm';
+import { User } from '../users/entities/user.entity';
+import { Repository } from 'typeorm';
+import { PersonalAccessToken } from './entities/personal-access-token-entity';
+import { SignUpDto } from './dto/signUp-dto';
+import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
+import { BcryptService } from './hashing/bcrypt.service';
+import { instanceToInstance } from 'class-transformer';
+import { SignInDto } from './dto/login-dto';
 
 @Injectable()
 export class AuthService {
-  create(createAuthDto: CreateAuthDto) {
-    return 'This action adds a new auth';
+  constructor(
+    @InjectRepository(User) private readonly usersRespository: Repository<User>,
+    private readonly bcryptService: BcryptService,
+    @InjectRepository(PersonalAccessToken)
+    private readonly accessTokenRepository: Repository<PersonalAccessToken>,
+  ) {}
+
+  async register(signUpDto: SignUpDto): Promise<ApiRResponse<User>> {
+    const isExisting = await this.usersRespository.exists({
+      where: { email: signUpDto.email },
+    });
+    if (isExisting) throw new ConflictException('Email already exist');
+
+    const user = this.usersRespository.create({
+      name: signUpDto.name,
+      email: signUpDto.email,
+      password: await this.bcryptService.hash(signUpDto.password),
+      role: signUpDto.role,
+    });
+    const savedUser = await this.usersRespository.save(user);
+    const transformUser = instanceToInstance(savedUser); // exluded the password
+    return createResponse(
+      'success',
+      'User registered successfully',
+      transformUser,
+    );
   }
 
-  findAll() {
-    return `This action returns all auth`;
+  async login(sigInDto: SignInDto) {
+    const user = await this.validateUser(sigInDto.email, sigInDto.password);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} auth`;
-  }
-
-  update(id: number, updateAuthDto: UpdateAuthDto) {
-    return `This action updates a #${id} auth`;
-  }
-
-  remove(id: number) {
-    return `This action removes a #${id} auth`;
+  async validateUser(email: string, password: string): Promise<User> {
+    const user = await this.usersRespository.findOneBy({ email });
+    if (!user) throw new UnauthorizedException('Invalid email or password');
+    const isMatch = await this.bcryptService.compare(password, user.password);
+    if (!isMatch) throw new UnauthorizedException('Invalid email or password');
+    return user;
   }
 }
