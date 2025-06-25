@@ -63,6 +63,19 @@ export class AuthService {
     if (!isMatch) throw new UnauthorizedException('Invalid email or password');
     return user;
   }
+
+  async validateToken(bearerToken: string) {
+    if (!bearerToken) throw new UnauthorizedException();
+
+    const hashedToken = createHash('sha256').update(bearerToken).digest('hex');
+
+    const tokenRecord = await this.accessTokenRepository.findOne({
+      where: { token: hashedToken },
+      relations: ['user'],
+    });
+    if (!tokenRecord) throw new UnauthorizedException();
+  }
+
   private async generateToken(
     user: User,
     tokenName = 'Login Token',
