@@ -15,15 +15,22 @@ import { BcryptService } from './hashing/bcrypt.service';
 import { instanceToInstance } from 'class-transformer';
 import { SignInDto } from './dto/login-dto';
 import { createHash, randomBytes } from 'crypto';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
+  private tokenExpiresInTime: number;
   constructor(
     @InjectRepository(User) private readonly usersRespository: Repository<User>,
     private readonly bcryptService: BcryptService,
     @InjectRepository(PersonalAccessToken)
     private readonly accessTokenRepository: Repository<PersonalAccessToken>,
-  ) {}
+    private readonly configService: ConfigService,
+  ) {
+    this.tokenExpiresInTime = Number(
+      this.configService.get('TOKEN_EXPIRE_IN_MINUTES'),
+    );
+  }
 
   async register(signUpDto: SignUpDto): Promise<ApiRResponse<User>> {
     const isExisting = await this.usersRespository.exists({
@@ -74,6 +81,23 @@ export class AuthService {
       relations: ['user'],
     });
     if (!tokenRecord) throw new UnauthorizedException();
+
+    const tokenExpiration = new Date();
+
+    tokenExpiration.setMinutes(
+      tokenExpiration.getMinutes() - this.tokenExpiresInTime,
+    );
+    if (
+      tokenRecord.last_used_at &&
+      tokenRecord.last_used_at < tokenExpiration
+    ) {
+      await this.accessTokenRepository.delete(tokenRecord.id);
+      throw new UnauthorizedException('Token expired');
+    }
+    tokenRecord.last_used_at = new Date();
+    await this.accessTokenRepository.save(tokenRecord);
+
+    return tokenRecord.user;
   }
 
   private async generateToken(
