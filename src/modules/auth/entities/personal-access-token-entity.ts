@@ -1,7 +1,9 @@
+import { Exclude } from 'class-transformer';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   Column,
   CreateDateColumn,
+  DeleteDateColumn,
   Entity,
   JoinColumn,
   ManyToOne,
@@ -27,6 +29,10 @@ export class PersonalAccessToken {
 
   @CreateDateColumn()
   created_at: Date;
+
+  @Exclude()
+  @DeleteDateColumn()
+  deleted_at: Date;
 
   @ManyToOne(() => User)
   @JoinColumn({ name: 'user_id' })

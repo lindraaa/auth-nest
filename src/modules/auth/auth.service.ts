@@ -70,7 +70,7 @@ export class AuthService {
       token: hashedToken,
     });
     if (!tokenRecord) throw new NotFoundException('Token not found');
-    await this.accessTokenRepository.delete(tokenRecord.id);
+    await this.accessTokenRepository.softDelete(tokenRecord.id);
     return createResponse('success', 'Logout Successfully');
   }
 
