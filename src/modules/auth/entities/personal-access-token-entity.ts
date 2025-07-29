@@ -31,7 +31,7 @@ export class PersonalAccessToken {
   created_at: Date;
 
   @Exclude()
-  @DeleteDateColumn()
+  @DeleteDateColumn({ nullable: true })
   deleted_at: Date;
 
   @ManyToOne(() => User)
