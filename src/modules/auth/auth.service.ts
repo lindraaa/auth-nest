@@ -3,6 +3,7 @@ import {
   Inject,
   Injectable,
   InternalServerErrorException,
+  NotFoundException,
   UnauthorizedException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -61,6 +62,16 @@ export class AuthService {
       token,
       user: safeUser,
     });
+  }
+  async logout(bearerToken: string) {
+    if (!bearerToken) throw new UnauthorizedException('Invalid Token');
+    const hashedToken = createHash('sha256').update(bearerToken).digest('hex');
+    const tokenRecord = await this.accessTokenRepository.findOneBy({
+      token: hashedToken,
+    });
+    if (!tokenRecord) throw new NotFoundException('Token not found');
+    await this.accessTokenRepository.delete(tokenRecord.id);
+    return createResponse('success', 'Logout Successfully');
   }
 
   async validateUser(email: string, password: string): Promise<User> {
