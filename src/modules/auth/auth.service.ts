@@ -122,6 +122,7 @@ export class AuthService {
       user_id: user.id,
       name: tokenName,
       token: hashedToken,
+      role: user.role,
       last_used_at: new Date(),
     });
     try {

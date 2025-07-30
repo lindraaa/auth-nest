@@ -1,5 +1,6 @@
 import { Exclude } from 'class-transformer';
 import { PersonalAccessToken } from 'src/modules/auth/entities/personal-access-token-entity';
+import { Role } from 'src/modules/auth/enums/role.enum';
 import {
   Column,
   CreateDateColumn,
@@ -9,11 +10,6 @@ import {
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
-
-export enum Role {
-  User = 'user',
-  Admin = 'admin',
-}
 
 @Entity('users')
 export class User {
