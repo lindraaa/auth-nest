@@ -9,6 +9,7 @@ import {
   ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { Role } from '../enums/role.enum';
 
 @Entity('personal_access_tokens')
 export class PersonalAccessToken {
@@ -34,7 +35,10 @@ export class PersonalAccessToken {
   @DeleteDateColumn({ nullable: true })
   deleted_at: Date;
 
-  @ManyToOne(() => User)
+  @Exclude()
+  role: Role;
+
+  @ManyToOne(() => User, (user) => user.tokens)
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
