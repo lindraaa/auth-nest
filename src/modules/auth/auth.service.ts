@@ -59,8 +59,8 @@ export class AuthService {
     const token = await this.generateToken(user, 'Login token');
     const safeUser = instanceToInstance(user);
     return createResponse('success', 'Login Successfully', {
-      token,
       user: safeUser,
+      token,
     });
   }
   async logout(bearerToken: string) {

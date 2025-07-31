@@ -21,6 +21,7 @@ export class SignUpDto {
     enum: Role,
     required: false,
   })
+  // @ApiProperty({ enum: ['Admin', 'User'] })
   @IsOptional()
   @IsEnum(Role)
   role: Role;
