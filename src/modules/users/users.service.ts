@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { CreateUserDto } from './dto/create-user.dto';
-import { UpdateUserDto } from './dto/update-user.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from './entities/user.entity';
 import { Repository } from 'typeorm';
+import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
+import { instanceToInstance } from 'class-transformer';
 
 @Injectable()
 export class UsersService {
@@ -12,9 +12,10 @@ export class UsersService {
     private readonly userRespository: Repository<User>,
   ) {}
 
-  async findOne(id: number): Promise<User | null> {
+  async findOne(id: number): Promise<ApiRResponse<User | null>> {
     const user = await this.userRespository.findOne({ where: { id } });
     if (!user) throw new NotFoundException('User not found');
-    return user;
+    const response = instanceToInstance(user);
+    return createResponse('success', 'Found User', response);
   }
 }
