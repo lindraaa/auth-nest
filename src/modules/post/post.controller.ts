@@ -10,14 +10,16 @@ import {
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
+import { Paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { Post as PostEntity } from './entities/post.entity';
 
 @Controller('api/v1/post')
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  @Post()
-  create(@Body() createPostDto: CreatePostDto) {
-    return this.postService.create(createPostDto);
+  @Get()
+  findAll(@Paginate() query: PaginateQuery): Promise<Paginated<PostEntity>> {
+    return this.postService.findAll(query);
   }
 
   @Get('byUser/:id')
@@ -30,6 +32,10 @@ export class PostController {
     return this.postService.findOne(+id);
   }
 
+  @Post()
+  create(@Body() createPostDto: CreatePostDto) {
+    return this.postService.create(createPostDto);
+  }
   @Patch(':id')
   update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
     return this.postService.update(+id, updatePostDto);

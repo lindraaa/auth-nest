@@ -7,6 +7,7 @@ import { Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
 import { instanceToInstance } from 'class-transformer';
+import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 
 @Injectable()
 export class PostService {
@@ -14,6 +15,15 @@ export class PostService {
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
   ) {}
+  async findAll(query: PaginateQuery): Promise<Paginated<Post>> {
+    return paginate(query, this.postRepository, {
+      sortableColumns: ['title'],
+      nullSort: 'last',
+      defaultSortBy: [['id', 'DESC']],
+      defaultLimit: 10,
+      searchableColumns: ['title', 'content'],
+    });
+  }
   async create(createPostDto: CreatePostDto): Promise<ApiRResponse<Post>> {
     const user = await this.usersRepository.findOneBy({
       id: createPostDto.user_id,
