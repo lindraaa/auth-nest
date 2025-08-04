@@ -32,8 +32,8 @@ export class PostController {
   }
 
   @Get(':id')
-  findOne(@Param('id') id: string): Promise<ApiRResponse<PostEntity>> {
-    return this.postService.findOne(+id);
+  findOne(@Param('id') id: number): Promise<ApiRResponse<PostEntity>> {
+    return this.postService.findOne(id);
   }
 
   @Post()
@@ -43,12 +43,15 @@ export class PostController {
     return this.postService.create(createPostDto);
   }
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updatePostDto: UpdatePostDto) {
-    return this.postService.update(+id, updatePostDto);
+  update(
+    @Param('id') id: number,
+    @Body() updatePostDto: UpdatePostDto,
+  ): Promise<ApiRResponse<PostEntity | null>> {
+    return this.postService.update(id, updatePostDto);
   }
 
   @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.postService.remove(+id);
+  remove(@Param('id') id: number): Promise<ApiRResponse<void>> {
+    return this.postService.remove(id);
   }
 }

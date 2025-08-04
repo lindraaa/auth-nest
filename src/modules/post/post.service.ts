@@ -3,7 +3,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { IsNull, Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
 import { instanceToInstance } from 'class-transformer';
@@ -61,11 +61,29 @@ export class PostService {
     return createResponse('success', 'Post found', post);
   }
 
-  update(id: number, updatePostDto: UpdatePostDto) {
-    return `This action updates a #${id} post`;
+  async update(
+    id: number,
+    updatePostDto: UpdatePostDto,
+  ): Promise<ApiRResponse<Post | null>> {
+    const post = await this.postRepository.findOneBy({ id });
+    if (!post) throw new NotFoundException('Post not found');
+    const updateData = {
+      ...updatePostDto,
+    };
+    const data = await this.postRepository.merge(post, updateData);
+    await this.postRepository.save(data);
+    return createResponse('success', 'Update Post Succeffully', data);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} post`;
+  async remove(id: number): Promise<ApiRResponse<void>> {
+    const post = await this.postRepository.findOne({
+      where: {
+        id,
+        deleted_at: IsNull(),
+      },
+    });
+    if (!post) throw new NotFoundException('Post not found');
+    await this.postRepository.softDelete(id);
+    return createResponse('success', 'Delete Post Succeffully');
   }
 }
