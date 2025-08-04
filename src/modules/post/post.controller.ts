@@ -16,6 +16,7 @@ import { Post as PostEntity } from './entities/post.entity';
 import { ApiRResponse } from 'src/shared/utils/response.util';
 import { User } from '../users/entities/user.entity';
 import { TokenAuthGuard } from '../auth/guards/token-auth.guard';
+import { OwnershipGuard } from './guards/ownership/ownership.guard';
 
 @Controller('api/v1/post')
 export class PostController {
@@ -47,7 +48,7 @@ export class PostController {
   ): Promise<ApiRResponse<PostEntity>> {
     return this.postService.create(createPostDto);
   }
-  @UseGuards(TokenAuthGuard)
+  @UseGuards(TokenAuthGuard, OwnershipGuard)
   @Patch(':id')
   update(
     @Param('id') id: number,
@@ -55,7 +56,7 @@ export class PostController {
   ): Promise<ApiRResponse<PostEntity | null>> {
     return this.postService.update(id, updatePostDto);
   }
-  @UseGuards(TokenAuthGuard)
+  @UseGuards(TokenAuthGuard, OwnershipGuard)
   @Delete(':id')
   remove(@Param('id') id: number): Promise<ApiRResponse<void>> {
     return this.postService.remove(id);
