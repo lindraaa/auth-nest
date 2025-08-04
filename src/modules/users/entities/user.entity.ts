@@ -1,6 +1,7 @@
 import { Exclude } from 'class-transformer';
 import { PersonalAccessToken } from 'src/modules/auth/entities/personal-access-token-entity';
 import { Role } from 'src/modules/auth/enums/role.enum';
+import { Post } from 'src/modules/post/entities/post.entity';
 import {
   Column,
   CreateDateColumn,
@@ -51,4 +52,7 @@ export class User {
 
   @OneToMany(() => PersonalAccessToken, (token) => token.user_id)
   tokens: PersonalAccessToken[];
+
+  @OneToMany(() => Post, (post) => post.user)
+  posts: Post[];
 }
