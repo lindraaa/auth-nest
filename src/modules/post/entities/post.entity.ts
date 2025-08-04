@@ -16,6 +16,8 @@ export class Post {
   @PrimaryGeneratedColumn()
   id: number;
 
+  @Column({ type: 'int' })
+  user_id: number;
   @Column({ type: 'varchar', nullable: false })
   title: string;
 
@@ -27,12 +29,6 @@ export class Post {
 
   @UpdateDateColumn()
   updated_at: Date;
-
-  @Column({ type: 'int', nullable: true })
-  created_by: number;
-
-  @Column({ type: 'int', nullable: true })
-  updated_by: number;
 
   @DeleteDateColumn()
   deleted_at: Date;
