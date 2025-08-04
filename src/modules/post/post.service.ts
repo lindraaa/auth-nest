@@ -15,14 +15,15 @@ export class PostService {
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
   ) {}
-  async findAll(query: PaginateQuery): Promise<Paginated<Post>> {
-    return paginate(query, this.postRepository, {
+  async findAll(query: PaginateQuery): Promise<ApiRResponse<Paginated<Post>>> {
+    const response = await paginate(query, this.postRepository, {
       sortableColumns: ['title'],
       nullSort: 'last',
       defaultSortBy: [['id', 'DESC']],
       defaultLimit: 10,
       searchableColumns: ['title', 'content'],
     });
+    return createResponse('success', 'list of Posts', response);
   }
   async create(createPostDto: CreatePostDto): Promise<ApiRResponse<Post>> {
     const user = await this.usersRepository.findOneBy({
@@ -39,7 +40,7 @@ export class PostService {
     return createResponse('success', 'Post created succesffully', response);
   }
   //find all post by user id
-  async findAllPost(user_id: number) {
+  async findAllPost(user_id: number): Promise<ApiRResponse<User>> {
     const postByUser = await this.usersRepository.findOne({
       where: { id: user_id },
       relations: ['posts'],
@@ -54,7 +55,7 @@ export class PostService {
     );
   }
   //find post by id
-  async findOne(id: number) {
+  async findOne(id: number): Promise<ApiRResponse<Post>> {
     const post = await this.postRepository.findOneBy({ id });
     if (!post) throw new NotFoundException('Post not found');
     return createResponse('success', 'Post found', post);
