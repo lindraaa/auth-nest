@@ -10,7 +10,7 @@ export class CreatePostDto {
   @IsNotEmpty({ message: 'The content is required' })
   content: string;
 
-  @ApiProperty({ description: 'Posts by user' })
-  @IsNotEmpty({ message: 'The user id is required' })
-  user_id: number;
+  // @ApiProperty({ description: 'Posts by user' })
+  // @IsNotEmpty({ message: 'The user id is required' })
+  // user_id: number;
 }

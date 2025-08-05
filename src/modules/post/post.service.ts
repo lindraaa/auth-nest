@@ -1,4 +1,8 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -8,12 +12,14 @@ import { Post } from './entities/post.entity';
 import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
 import { instanceToInstance } from 'class-transformer';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
+import { RequestContext } from 'src/request-context/request-context';
 
 @Injectable()
 export class PostService {
   constructor(
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
+    private readonly requestContext: RequestContext,
   ) {}
   async findAll(query: PaginateQuery): Promise<ApiRResponse<Paginated<Post>>> {
     const response = await paginate(query, this.postRepository, {
@@ -26,14 +32,17 @@ export class PostService {
     return createResponse('success', 'list of Posts', response);
   }
   async create(createPostDto: CreatePostDto): Promise<ApiRResponse<Post>> {
-    const user = await this.usersRepository.findOneBy({
-      id: createPostDto.user_id,
-    });
-    if (!user) throw new NotFoundException('User not Found');
+    // const user = await this.usersRepository.findOneBy({
+    //   id: createPostDto.user_id,
+    // });
+    // if (!user) throw new NotFoundException('User not Found');
+    const userId = this.requestContext.getUserId();
+    // console.log(userId);
+    if (!userId) throw new UnauthorizedException('User not authenticated');
     const post = await this.postRepository.create({
       title: createPostDto.title,
       content: createPostDto.content,
-      user: user,
+      user_id: userId,
     });
     const savePost = await this.postRepository.save(post);
     const response = instanceToInstance(savePost);
@@ -67,8 +76,11 @@ export class PostService {
   ): Promise<ApiRResponse<Post | null>> {
     const post = await this.postRepository.findOneBy({ id });
     if (!post) throw new NotFoundException('Post not found');
+    const userId = this.requestContext.getUserId();
+    if (!userId) throw new UnauthorizedException('User not authenticated');
     const updateData = {
       ...updatePostDto,
+      updated_by: userId,
     };
     const data = await this.postRepository.merge(post, updateData);
     await this.postRepository.save(data);

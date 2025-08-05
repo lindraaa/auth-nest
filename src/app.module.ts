@@ -5,9 +5,16 @@ import { DatabaseModule } from './database/database/database.module';
 import { UsersModule } from './modules/users/users.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { PostModule } from './modules/post/post.module';
+import { RequestContextModule } from './request-context/request-context.module';
 
 @Module({
-  imports: [DatabaseModule, UsersModule, AuthModule, PostModule],
+  imports: [
+    DatabaseModule,
+    UsersModule,
+    AuthModule,
+    PostModule,
+    RequestContextModule,
+  ],
   controllers: [AppController],
   providers: [AppService],
 })

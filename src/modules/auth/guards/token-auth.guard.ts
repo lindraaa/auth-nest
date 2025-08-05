@@ -21,7 +21,7 @@ export class TokenAuthGuard implements CanActivate {
     }
     // console.log(authHeader);
     const token = authHeader.split(' ')[1];
-    console.log(token);
+    // console.log(token);
     const user = await this.authService.validateToken(token);
     if (!user) throw new UnauthorizedException('Invalid or expired token');
 
