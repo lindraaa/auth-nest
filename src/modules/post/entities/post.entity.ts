@@ -18,6 +18,7 @@ export class Post {
 
   @Column({ type: 'int' })
   user_id: number;
+
   @Column({ type: 'varchar', nullable: false })
   title: string;
 
@@ -33,7 +34,9 @@ export class Post {
   @DeleteDateColumn()
   deleted_at: Date;
 
-  @ManyToOne(() => User, (user) => user.posts)
+  @ManyToOne(() => User, (user) => user.posts, {
+    onDelete: 'CASCADE',
+  })
   @JoinColumn({ name: 'user_id' }) //Optional
   user: User;
 }

@@ -38,7 +38,7 @@ export class PersonalAccessToken {
   @Exclude()
   role: Role;
 
-  @ManyToOne(() => User, (user) => user.tokens)
+  @ManyToOne(() => User, (user) => user.tokens, { onDelete: 'CASCADE' })
   @JoinColumn({ name: 'user_id' })
   user: User;
 }
