@@ -65,9 +65,13 @@ export class PostService {
   }
   //find post by id
   async findOne(id: number): Promise<ApiRResponse<Post>> {
-    const post = await this.postRepository.findOneBy({ id });
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['user'],
+    });
     if (!post) throw new NotFoundException('Post not found');
-    return createResponse('success', 'Post found', post);
+
+    return createResponse('success', 'Post found', instanceToInstance(post));
   }
 
   async update(
