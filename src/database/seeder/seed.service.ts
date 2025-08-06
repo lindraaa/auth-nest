@@ -1,35 +1,31 @@
 import { Injectable } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { title } from 'process';
 import { PersonalAccessToken } from 'src/modules/auth/entities/personal-access-token-entity';
 import { Role } from 'src/modules/auth/enums/role.enum';
 import { BcryptService } from 'src/modules/auth/hashing/bcrypt.service';
 import { Post } from 'src/modules/post/entities/post.entity';
 import { User } from 'src/modules/users/entities/user.entity';
-import { Repository } from 'typeorm';
+import { DataSource } from 'typeorm';
 
 @Injectable()
 export class SeedService {
   constructor(
-    @InjectRepository(User)
-    private readonly userRepository: Repository<User>,
-    @InjectRepository(PersonalAccessToken)
-    private readonly patRespository: Repository<PersonalAccessToken>,
+    private dataSource: DataSource,
     private readonly bcryptService: BcryptService,
-    @InjectRepository(Post)
-    private readonly postRepository: Repository<Post>,
   ) {}
 
   async run() {
+    const userRepository = this.dataSource.getRepository(User);
+    const patRespository = this.dataSource.getRepository(PersonalAccessToken);
+    const postRepository = this.dataSource.getRepository(Post);
     // Clear existing data
-    await this.userRepository.query('DELETE FROM users');
-    await this.userRepository.query('ALTER TABLE users AUTO_INCREMENT = 1');
+    await userRepository.query('DELETE FROM users');
+    await userRepository.query('ALTER TABLE users AUTO_INCREMENT = 1');
 
-    await this.patRespository.query('TRUNCATE TABLE personal_access_tokens');
-    await this.postRepository.query('TRUNCATE TABLE post');
+    await patRespository.query('TRUNCATE TABLE personal_access_tokens');
+    await postRepository.query('TRUNCATE TABLE post');
 
     // Seed new data
-    const users = await this.userRepository.save([
+    const users = await userRepository.save([
       {
         name: 'Admin',
         email: 'admin123@gmail.com',
@@ -67,6 +63,6 @@ export class SeedService {
       },
     ];
 
-    await this.postRepository.save(posts);
+    await postRepository.save(posts);
   }
 }
