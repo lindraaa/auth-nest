@@ -1,6 +1,8 @@
 import {
+  Inject,
   Injectable,
   NotFoundException,
+  Scope,
   UnauthorizedException,
 } from '@nestjs/common';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -20,7 +22,11 @@ export class PostService {
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
     private readonly requestContext: RequestContext,
-  ) {}
+
+    @Inject('POST_LIKES') postLikes: string[],
+  ) {
+    console.log(postLikes);
+  }
   async findAll(query: PaginateQuery): Promise<ApiRResponse<Paginated<Post>>> {
     const response = await paginate(query, this.postRepository, {
       sortableColumns: ['title'],

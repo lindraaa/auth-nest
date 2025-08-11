@@ -14,6 +14,9 @@ import { RequestContextModule } from 'src/request-context/request-context.module
     RequestContextModule,
   ],
   controllers: [PostController],
-  providers: [PostService],
+  providers: [
+    PostService,
+    { provide: 'POST_LIKES', useValue: ['asd', 'sdasd'] },
+  ],
 })
 export class PostModule {}
