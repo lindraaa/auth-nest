@@ -1,7 +1,7 @@
 import { Injectable, Scope } from '@nestjs/common';
 import { User } from 'src/modules/users/entities/user.entity';
 
-@Injectable({ scope: Scope.REQUEST })
+@Injectable()
 //Scope.REQUEST means NestJS creates a new copy of the class for every incoming request, so data stays separate and safe for each user.
 export class RequestContext {
   private _user: User | null = null;
