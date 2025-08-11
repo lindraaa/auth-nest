@@ -15,6 +15,8 @@ import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
 import { instanceToInstance } from 'class-transformer';
 import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { RequestContext } from 'src/request-context/request-context';
+import { ConfigService, ConfigType } from '@nestjs/config';
+import databaseConfig from 'src/config/database.config';
 
 @Injectable()
 export class PostService {
@@ -22,10 +24,16 @@ export class PostService {
     @InjectRepository(User) private readonly usersRepository: Repository<User>,
     @InjectRepository(Post) private readonly postRepository: Repository<Post>,
     private readonly requestContext: RequestContext,
-
+    // private readonly configService: ConfigService,
     @Inject('POST_LIKES') postLikes: string[],
+    @Inject(databaseConfig.KEY)
+    private readonly databaseConfiguration: ConfigType<typeof databaseConfig>,
   ) {
     console.log(postLikes);
+    // const databaseHost = this.configService.get('database.test', 'localhost');
+    // console.log(databaseHost);
+
+    console.log(databaseConfiguration);
   }
   async findAll(query: PaginateQuery): Promise<ApiRResponse<Paginated<Post>>> {
     const response = await paginate(query, this.postRepository, {
