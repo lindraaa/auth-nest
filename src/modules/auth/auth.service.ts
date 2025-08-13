@@ -102,7 +102,7 @@ export class AuthService {
       tokenRecord.last_used_at < tokenExpiration
     ) {
       await this.accessTokenRepository.delete(tokenRecord.id);
-      throw new UnauthorizedException('Token expired');
+      throw new UnauthorizedException();
     }
     tokenRecord.last_used_at = new Date();
     await this.accessTokenRepository.save(tokenRecord);

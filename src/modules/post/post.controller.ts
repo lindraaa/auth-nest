@@ -7,6 +7,7 @@ import {
   Param,
   Delete,
   UseGuards,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -32,13 +33,17 @@ export class PostController {
 
   @UseGuards(TokenAuthGuard)
   @Get('byUser/:id')
-  findAllPost(@Param('id') user_id: number): Promise<ApiRResponse<User>> {
+  findAllPost(
+    @Param('id', ParseIntPipe) user_id: number,
+  ): Promise<ApiRResponse<User>> {
     return this.postService.findAllPost(user_id);
   }
 
   @UseGuards(TokenAuthGuard)
   @Get(':id')
-  findOne(@Param('id') id: number): Promise<ApiRResponse<PostEntity>> {
+  findOne(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<ApiRResponse<PostEntity>> {
     return this.postService.findOne(id);
   }
   @UseGuards(TokenAuthGuard)
@@ -51,14 +56,14 @@ export class PostController {
   @UseGuards(TokenAuthGuard, OwnershipGuard)
   @Patch(':id')
   update(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
   ): Promise<ApiRResponse<PostEntity | null>> {
     return this.postService.update(id, updatePostDto);
   }
   @UseGuards(TokenAuthGuard, OwnershipGuard)
   @Delete(':id')
-  remove(@Param('id') id: number): Promise<ApiRResponse<void>> {
+  remove(@Param('id', ParseIntPipe) id: number): Promise<ApiRResponse<void>> {
     return this.postService.remove(id);
   }
 }
