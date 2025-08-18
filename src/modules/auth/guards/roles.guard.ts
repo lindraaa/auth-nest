@@ -17,7 +17,7 @@ export class RolesGuard implements CanActivate {
   ): boolean | Promise<boolean> | Observable<boolean> {
     const roles = this.reflector.getAllAndOverride<Role[]>(ROLES_KEY, [
       context.getHandler(),
-      context.getClass(),
+      context.getClass(), // these methods extract both controller and method metadata at once,
     ]);
     // if (!roles) {
     //   console.log('No roles');
