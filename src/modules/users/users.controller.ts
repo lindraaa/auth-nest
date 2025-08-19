@@ -7,7 +7,7 @@ import { RolesGuard } from '../auth/guards/roles.guard';
 import { ApiBearerAuth } from '@nestjs/swagger';
 
 @ApiBearerAuth()
-@UseGuards(TokenAuthGuard)
+// @UseGuards(TokenAuthGuard)
 @Controller('api/v1/user')
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
@@ -23,7 +23,7 @@ export class UsersController {
     return 'You are user authorized for this endpoint';
   }
 
-  @UseGuards(RolesGuard)
+  // @UseGuards(RolesGuard)
   @Roles(Role.Admin, Role.User)
   @Get(':id')
   findOne(@Param('id') id: number) {

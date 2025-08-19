@@ -9,6 +9,6 @@ export const GetUser = createParamDecorator(
   (data: unknown, ctx: ExecutionContext): User => {
     const request = ctx.switchToHttp().getRequest();
     // console.log(req.user);
-    return request.user;
+    return request['user'];
   },
 );

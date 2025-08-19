@@ -7,6 +7,8 @@ import { AuthModule } from './modules/auth/auth.module';
 import { PostModule } from './modules/post/post.module';
 import { RequestContextModule } from './request-context/request-context.module';
 import { SeedModule } from './database/seeder/seed.module';
+import { APP_GUARD } from '@nestjs/core';
+import { TokenAuthGuard } from './modules/auth/guards/token-auth.guard';
 
 @Module({
   imports: [
@@ -18,6 +20,12 @@ import { SeedModule } from './database/seeder/seed.module';
     SeedModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_GUARD,
+      useClass: TokenAuthGuard,
+    },
+  ],
 })
 export class AppModule {}
