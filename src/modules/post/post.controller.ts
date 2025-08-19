@@ -23,7 +23,7 @@ import { OwnershipGuard } from './guards/ownership/ownership.guard';
 export class PostController {
   constructor(private readonly postService: PostService) {}
 
-  @UseGuards(TokenAuthGuard)
+  // @UseGuards(TokenAuthGuard)
   @Get()
   findAll(
     @Paginate() query: PaginateQuery,
@@ -31,7 +31,7 @@ export class PostController {
     return this.postService.findAll(query);
   }
 
-  @UseGuards(TokenAuthGuard)
+  // @UseGuards(TokenAuthGuard)
   @Get('byUser/:id')
   findAllPost(
     @Param('id', ParseIntPipe) user_id: number,
@@ -39,21 +39,21 @@ export class PostController {
     return this.postService.findAllPost(user_id);
   }
 
-  @UseGuards(TokenAuthGuard)
+  // @UseGuards(TokenAuthGuard)
   @Get(':id')
   findOne(
     @Param('id', ParseIntPipe) id: number,
   ): Promise<ApiRResponse<PostEntity>> {
     return this.postService.findOne(id);
   }
-  @UseGuards(TokenAuthGuard)
+  // @UseGuards(TokenAuthGuard)
   @Post()
   create(
     @Body() createPostDto: CreatePostDto,
   ): Promise<ApiRResponse<PostEntity>> {
     return this.postService.create(createPostDto);
   }
-  @UseGuards(TokenAuthGuard, OwnershipGuard)
+  @UseGuards(OwnershipGuard)
   @Patch(':id')
   update(
     @Param('id', ParseIntPipe) id: number,
@@ -61,7 +61,7 @@ export class PostController {
   ): Promise<ApiRResponse<PostEntity | null>> {
     return this.postService.update(id, updatePostDto);
   }
-  @UseGuards(TokenAuthGuard, OwnershipGuard)
+  @UseGuards(OwnershipGuard)
   @Delete(':id')
   remove(@Param('id', ParseIntPipe) id: number): Promise<ApiRResponse<void>> {
     return this.postService.remove(id);

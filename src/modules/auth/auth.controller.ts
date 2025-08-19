@@ -15,6 +15,7 @@ import { GetUser } from './decorators/get-user.decorator';
 import { instanceToPlain } from 'class-transformer';
 import { TokenAuthGuard } from './guards/token-auth.guard';
 import { Request } from 'express';
+import { Public } from './decorators/public.decorator';
 
 @Controller('/api/v1/auth')
 export class AuthController {
@@ -24,21 +25,27 @@ export class AuthController {
   async register(@Body() signUpDto: SignUpDto) {
     return await this.authService.register(signUpDto);
   }
-
+  @Public()
   @Post('login')
   async login(@Body() signInDto: SignInDto) {
     return await this.authService.login(signInDto);
   }
-  @UseGuards(TokenAuthGuard)
+  // @UseGuards(TokenAuthGuard)
   @Post('logout')
   async logout(@Req() req: Request) {
     const bearerToken = req.headers.authorization?.split(' ')[1];
     if (!bearerToken) throw new UnauthorizedException('No token provided');
     return await this.authService.logout(bearerToken);
   }
-  @UseGuards(TokenAuthGuard)
+  // @UseGuards(TokenAuthGuard)
   @Get('me')
   async me(@GetUser() user: User) {
     return instanceToPlain(user);
   }
+
+  // ------------- Without using custom deocrotr
+  // async me(@Req() req: Request) {
+  //   const user = req['user'] as User;
+  //   return instanceToPlain(user);
+  // }
 }
