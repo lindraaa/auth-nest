@@ -22,6 +22,7 @@ import { TokenAuthGuard } from '../auth/guards/token-auth.guard';
 import { OwnershipGuard } from './guards/ownership/ownership.guard';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
+import { ImageValidationPipe } from '../upload/image-validation/image-validation.pipe';
 
 @Controller('api/v1/post')
 export class PostController {
@@ -64,7 +65,7 @@ export class PostController {
   )
   create(
     @Body() createPostDto: CreatePostDto,
-    @UploadedFile() image?: Express.Multer.File,
+    @UploadedFile(ImageValidationPipe) image?: Express.Multer.File,
   ): Promise<ApiRResponse<PostEntity>> {
     console.log(createPostDto, image);
     return this.postService.create(createPostDto, image);
