@@ -46,12 +46,13 @@ export class PostService {
       defaultSortBy: [['id', 'DESC']],
       defaultLimit: 10,
       searchableColumns: ['title', 'content'],
+      // relations: ['user', 'images'],
     });
     return createResponse('success', 'list of Posts', response);
   }
   async create(
     createPostDto: CreatePostDto,
-    image?: Express.Multer.File,
+    images?: Array<Express.Multer.File>,
   ): Promise<ApiRResponse<Post>> {
     // const user = await this.usersRepository.findOneBy({
     //   id: createPostDto.user_id,
@@ -66,16 +67,24 @@ export class PostService {
       user_id: userId,
     });
     await this.postRepository.save(post);
-    if (image) {
-      await this.imageRepository.save({
-        post_id: post.id,
-        file_path: image.path,
-        file_name: image.originalname,
-      });
+    if (images && images.length > 0) {
+      for (const image of images)
+        await this.imageRepository.save({
+          post_id: post.id,
+          file_path: image.path,
+          file_name: image.originalname,
+        });
     }
     return createResponse('success', 'Post created succesffully', {
       ...post,
-      image: image ? image : null,
+      image: images ? images : null,
+      //  image: images
+      //   ? images.map((img) => ({
+      //       file_name: img.originalname,
+      //       mimetype: img.mimetype,
+      //       path: img.path,
+      //     }))
+      //   : null,
     });
   }
   //find all post by user id
@@ -97,7 +106,7 @@ export class PostService {
   async findOne(id: number): Promise<ApiRResponse<Post>> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['user', 'images'],
     });
     if (!post) throw new NotFoundException('Post not found');
 

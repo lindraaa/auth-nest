@@ -10,6 +10,7 @@ import {
   ParseIntPipe,
   UseInterceptors,
   UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -20,7 +21,7 @@ import { ApiRResponse } from 'src/shared/utils/response.util';
 import { User } from '../users/entities/user.entity';
 import { TokenAuthGuard } from '../auth/guards/token-auth.guard';
 import { OwnershipGuard } from './guards/ownership/ownership.guard';
-import { FileInterceptor } from '@nestjs/platform-express';
+import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ImageValidationPipe } from '../upload/image-validation/image-validation.pipe';
 
@@ -54,7 +55,7 @@ export class PostController {
   // @UseGuards(TokenAuthGuard)
   @Post()
   @UseInterceptors(
-    FileInterceptor('image', {
+    FilesInterceptor('image', 10, {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {
@@ -65,10 +66,10 @@ export class PostController {
   )
   create(
     @Body() createPostDto: CreatePostDto,
-    @UploadedFile(ImageValidationPipe) image?: Express.Multer.File,
+    @UploadedFiles(ImageValidationPipe) images?: Array<Express.Multer.File>,
   ): Promise<ApiRResponse<PostEntity>> {
-    console.log(createPostDto, image);
-    return this.postService.create(createPostDto, image);
+    console.log(createPostDto, images);
+    return this.postService.create(createPostDto, images);
   }
   @UseGuards(OwnershipGuard)
   @Patch(':id')
