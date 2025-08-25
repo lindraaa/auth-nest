@@ -6,7 +6,10 @@ export class ImageValidationPipe implements PipeTransform {
   private readonly allowedMimeTypes = ['image/jpeg', 'image/png', 'image/gif'];
   private readonly maxSize = 5 * 1024 * 1024; // 5MB
 
-  transform(file: Express.Multer.File) {
+  transform(file?: Express.Multer.File) {
+    if (!file) {
+      return undefined;
+    }
     if (!this.allowedMimeTypes.includes(file.mimetype)) {
       throw new BadRequestException(
         `Invalid file type. Allowed types: ${this.allowedMimeTypes.join(', ')}`,

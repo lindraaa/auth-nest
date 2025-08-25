@@ -54,7 +54,7 @@ export class PostController {
   // @UseGuards(TokenAuthGuard)
   @Post()
   @UseInterceptors(
-    FileInterceptor('file', {
+    FileInterceptor('image', {
       storage: diskStorage({
         destination: './uploads',
         filename: (req, file, callback) => {

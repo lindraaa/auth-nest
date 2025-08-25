@@ -51,7 +51,7 @@ export class PostService {
   }
   async create(
     createPostDto: CreatePostDto,
-    image,
+    image?: Express.Multer.File,
   ): Promise<ApiRResponse<Post>> {
     // const user = await this.usersRepository.findOneBy({
     //   id: createPostDto.user_id,
@@ -64,15 +64,19 @@ export class PostService {
       title: createPostDto.title,
       content: createPostDto.content,
       user_id: userId,
-      images: [
-        this.imageRepository.create({
-          file_path: image.path,
-        }),
-      ],
     });
-    const savePost = await this.postRepository.save(post);
-    const response = instanceToInstance(savePost);
-    return createResponse('success', 'Post created succesffully', response);
+    await this.postRepository.save(post);
+    if (image) {
+      await this.imageRepository.save({
+        post_id: post.id,
+        file_path: image.path,
+        file_name: image.originalname,
+      });
+    }
+    return createResponse('success', 'Post created succesffully', {
+      ...post,
+      image: image ? image : null,
+    });
   }
   //find all post by user id
   async findAllPost(user_id: number): Promise<ApiRResponse<User>> {
