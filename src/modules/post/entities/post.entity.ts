@@ -1,4 +1,5 @@
 import { Exclude } from 'class-transformer';
+import { Upload } from 'src/modules/upload/entities/upload.entity';
 import { User } from 'src/modules/users/entities/user.entity';
 import {
   Column,
@@ -7,6 +8,7 @@ import {
   Entity,
   JoinColumn,
   ManyToOne,
+  OneToMany,
   PrimaryGeneratedColumn,
   UpdateDateColumn,
 } from 'typeorm';
@@ -39,4 +41,8 @@ export class Post {
   })
   @JoinColumn({ name: 'user_id' }) //Optional
   user: User;
+
+  //Images
+  @OneToMany(() => Upload, (upload) => upload.post, { cascade: true })
+  images: Upload[];
 }

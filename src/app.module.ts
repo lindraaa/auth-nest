@@ -10,6 +10,7 @@ import { SeedModule } from './database/seeder/seed.module';
 import { APP_GUARD } from '@nestjs/core';
 import { TokenAuthGuard } from './modules/auth/guards/token-auth.guard';
 import { LoggerMiddleware } from './middleware/logger/logger.middleware';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
@@ -19,6 +20,7 @@ import { LoggerMiddleware } from './middleware/logger/logger.middleware';
     PostModule,
     RequestContextModule,
     SeedModule,
+    UploadModule,
   ],
   controllers: [AppController],
   providers: [
