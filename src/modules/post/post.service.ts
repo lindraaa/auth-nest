@@ -17,6 +17,7 @@ import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { RequestContext } from 'src/request-context/request-context';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import databaseConfig from 'src/config/database.config';
+import { Upload } from '../upload/entities/upload.entity';
 
 @Injectable()
 export class PostService {
@@ -28,6 +29,9 @@ export class PostService {
     @Inject('POST_LIKES') postLikes: string[],
     @Inject(databaseConfig.KEY)
     private readonly databaseConfiguration: ConfigType<typeof databaseConfig>,
+    //upload image
+    @InjectRepository(Upload)
+    private readonly imageRepository: Repository<Upload>,
   ) {
     console.log(postLikes);
     // const databaseHost = this.configService.get('database.test', 'localhost');
@@ -45,7 +49,10 @@ export class PostService {
     });
     return createResponse('success', 'list of Posts', response);
   }
-  async create(createPostDto: CreatePostDto): Promise<ApiRResponse<Post>> {
+  async create(
+    createPostDto: CreatePostDto,
+    image,
+  ): Promise<ApiRResponse<Post>> {
     // const user = await this.usersRepository.findOneBy({
     //   id: createPostDto.user_id,
     // });
@@ -57,6 +64,11 @@ export class PostService {
       title: createPostDto.title,
       content: createPostDto.content,
       user_id: userId,
+      images: [
+        this.imageRepository.create({
+          file_path: image.path,
+        }),
+      ],
     });
     const savePost = await this.postRepository.save(post);
     const response = instanceToInstance(savePost);

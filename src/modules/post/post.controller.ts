@@ -8,6 +8,8 @@ import {
   Delete,
   UseGuards,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -18,6 +20,8 @@ import { ApiRResponse } from 'src/shared/utils/response.util';
 import { User } from '../users/entities/user.entity';
 import { TokenAuthGuard } from '../auth/guards/token-auth.guard';
 import { OwnershipGuard } from './guards/ownership/ownership.guard';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
 
 @Controller('api/v1/post')
 export class PostController {
@@ -48,10 +52,22 @@ export class PostController {
   }
   // @UseGuards(TokenAuthGuard)
   @Post()
+  @UseInterceptors(
+    FileInterceptor('file', {
+      storage: diskStorage({
+        destination: './uploads',
+        filename: (req, file, callback) => {
+          callback(null, file.originalname);
+        },
+      }),
+    }),
+  )
   create(
     @Body() createPostDto: CreatePostDto,
+    @UploadedFile() image?: Express.Multer.File,
   ): Promise<ApiRResponse<PostEntity>> {
-    return this.postService.create(createPostDto);
+    console.log(createPostDto, image);
+    return this.postService.create(createPostDto, image);
   }
   @UseGuards(OwnershipGuard)
   @Patch(':id')

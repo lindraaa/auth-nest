@@ -8,10 +8,11 @@ import { AuthModule } from '../auth/auth.module';
 import { RequestContextModule } from 'src/request-context/request-context.module';
 import { ConfigModule } from '@nestjs/config';
 import databaseConfig from 'src/config/database.config';
+import { Upload } from '../upload/entities/upload.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Post, User]),
+    TypeOrmModule.forFeature([Post, User, Upload]),
     AuthModule,
     RequestContextModule,
     ConfigModule.forFeature(databaseConfig),
