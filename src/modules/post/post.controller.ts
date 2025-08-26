@@ -24,6 +24,7 @@ import { OwnershipGuard } from './guards/ownership/ownership.guard';
 import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ImageValidationPipe } from '../upload/image-validation/image-validation.pipe';
+import { storage } from 'src/config/storage.config';
 
 @Controller('api/v1/post')
 export class PostController {
@@ -54,16 +55,7 @@ export class PostController {
   }
   // @UseGuards(TokenAuthGuard)
   @Post()
-  @UseInterceptors(
-    FilesInterceptor('image', 10, {
-      storage: diskStorage({
-        destination: './uploads',
-        filename: (req, file, callback) => {
-          callback(null, file.originalname);
-        },
-      }),
-    }),
-  )
+  @UseInterceptors(FilesInterceptor('image', 10, { storage }))
   create(
     @Body() createPostDto: CreatePostDto,
     @UploadedFiles(ImageValidationPipe) images?: Array<Express.Multer.File>,
