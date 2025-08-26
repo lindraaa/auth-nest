@@ -8,6 +8,9 @@ import {
   Delete,
   UseGuards,
   ParseIntPipe,
+  UseInterceptors,
+  UploadedFile,
+  UploadedFiles,
 } from '@nestjs/common';
 import { PostService } from './post.service';
 import { CreatePostDto } from './dto/create-post.dto';
@@ -18,6 +21,10 @@ import { ApiRResponse } from 'src/shared/utils/response.util';
 import { User } from '../users/entities/user.entity';
 import { TokenAuthGuard } from '../auth/guards/token-auth.guard';
 import { OwnershipGuard } from './guards/ownership/ownership.guard';
+import { FilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { ImageValidationPipe } from '../upload/image-validation/image-validation.pipe';
+import { storage } from 'src/config/storage.config';
 
 @Controller('api/v1/post')
 export class PostController {
@@ -48,18 +55,23 @@ export class PostController {
   }
   // @UseGuards(TokenAuthGuard)
   @Post()
+  @UseInterceptors(FilesInterceptor('image', 10, { storage }))
   create(
     @Body() createPostDto: CreatePostDto,
+    @UploadedFiles(ImageValidationPipe) images?: Array<Express.Multer.File>,
   ): Promise<ApiRResponse<PostEntity>> {
-    return this.postService.create(createPostDto);
+    console.log(createPostDto, images);
+    return this.postService.create(createPostDto, images);
   }
   @UseGuards(OwnershipGuard)
   @Patch(':id')
+  @UseInterceptors(FilesInterceptor('image', 10, { storage }))
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
+    @UploadedFiles(ImageValidationPipe) images?: Array<Express.Multer.File>,
   ): Promise<ApiRResponse<PostEntity | null>> {
-    return this.postService.update(id, updatePostDto);
+    return this.postService.update(id, updatePostDto, images);
   }
   @UseGuards(OwnershipGuard)
   @Delete(':id')

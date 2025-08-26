@@ -9,7 +9,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
 import { instanceToInstance } from 'class-transformer';
@@ -17,6 +17,7 @@ import { paginate, Paginated, PaginateQuery } from 'nestjs-paginate';
 import { RequestContext } from 'src/request-context/request-context';
 import { ConfigService, ConfigType } from '@nestjs/config';
 import databaseConfig from 'src/config/database.config';
+import { Upload } from '../upload/entities/upload.entity';
 
 @Injectable()
 export class PostService {
@@ -28,6 +29,9 @@ export class PostService {
     @Inject('POST_LIKES') postLikes: string[],
     @Inject(databaseConfig.KEY)
     private readonly databaseConfiguration: ConfigType<typeof databaseConfig>,
+    //upload image
+    @InjectRepository(Upload)
+    private readonly imageRepository: Repository<Upload>,
   ) {
     console.log(postLikes);
     // const databaseHost = this.configService.get('database.test', 'localhost');
@@ -42,10 +46,14 @@ export class PostService {
       defaultSortBy: [['id', 'DESC']],
       defaultLimit: 10,
       searchableColumns: ['title', 'content'],
+      // relations: ['user', 'images'],
     });
     return createResponse('success', 'list of Posts', response);
   }
-  async create(createPostDto: CreatePostDto): Promise<ApiRResponse<Post>> {
+  async create(
+    createPostDto: CreatePostDto,
+    images?: Array<Express.Multer.File>,
+  ): Promise<ApiRResponse<Post>> {
     // const user = await this.usersRepository.findOneBy({
     //   id: createPostDto.user_id,
     // });
@@ -58,15 +66,32 @@ export class PostService {
       content: createPostDto.content,
       user_id: userId,
     });
-    const savePost = await this.postRepository.save(post);
-    const response = instanceToInstance(savePost);
-    return createResponse('success', 'Post created succesffully', response);
+    await this.postRepository.save(post);
+    if (images && images.length > 0) {
+      for (const image of images)
+        await this.imageRepository.save({
+          post_id: post.id,
+          file_path: image.path,
+          file_name: image.originalname,
+        });
+    }
+    return createResponse('success', 'Post created succesffully', {
+      ...post,
+      image: images ? images : null,
+      //  image: images
+      //   ? images.map((img) => ({
+      //       file_name: img.originalname,
+      //       mimetype: img.mimetype,
+      //       path: img.path,
+      //     }))
+      //   : null,
+    });
   }
   //find all post by user id
   async findAllPost(user_id: number): Promise<ApiRResponse<User>> {
     const postByUser = await this.usersRepository.findOne({
       where: { id: user_id },
-      relations: ['posts'],
+      relations: ['posts', 'posts.images'],
     });
 
     if (!postByUser) throw new NotFoundException('User not found ');
@@ -81,7 +106,7 @@ export class PostService {
   async findOne(id: number): Promise<ApiRResponse<Post>> {
     const post = await this.postRepository.findOne({
       where: { id },
-      relations: ['user'],
+      relations: ['user', 'images'],
     });
     if (!post) throw new NotFoundException('Post not found');
 
@@ -91,8 +116,12 @@ export class PostService {
   async update(
     id: number,
     updatePostDto: UpdatePostDto,
+    images?: Array<Express.Multer.File>,
   ): Promise<ApiRResponse<Post | null>> {
-    const post = await this.postRepository.findOneBy({ id });
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['images'],
+    });
     if (!post) throw new NotFoundException('Post not found');
     const userId = this.requestContext.getUserId();
     if (!userId) throw new UnauthorizedException('User not authenticated');
@@ -102,7 +131,27 @@ export class PostService {
     };
     const data = await this.postRepository.merge(post, updateData);
     await this.postRepository.save(data);
-    return createResponse('success', 'Update Post Succeffully', data);
+    //Delete images
+    const delete_images = updatePostDto.delete_images;
+    if (delete_images?.length) {
+      console.log(delete_images);
+      await this.imageRepository.softDelete({ id: In(delete_images) });
+    }
+    //Add images
+    if (images?.length) {
+      for (const img of images) {
+        await this.imageRepository.save({
+          post_id: post.id,
+          file_path: img.path,
+          file_name: img.originalname,
+        });
+      }
+    }
+    const updatePost = await this.postRepository.findOne({
+      where: { id },
+      relations: ['images'],
+    });
+    return createResponse('success', 'Update Post Succeffully', updatePost);
   }
 
   async remove(id: number): Promise<ApiRResponse<void>> {
