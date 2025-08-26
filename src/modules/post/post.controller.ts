@@ -65,11 +65,13 @@ export class PostController {
   }
   @UseGuards(OwnershipGuard)
   @Patch(':id')
+  @UseInterceptors(FilesInterceptor('image', 10, { storage }))
   update(
     @Param('id', ParseIntPipe) id: number,
     @Body() updatePostDto: UpdatePostDto,
+    @UploadedFiles(ImageValidationPipe) images?: Array<Express.Multer.File>,
   ): Promise<ApiRResponse<PostEntity | null>> {
-    return this.postService.update(id, updatePostDto);
+    return this.postService.update(id, updatePostDto, images);
   }
   @UseGuards(OwnershipGuard)
   @Delete(':id')

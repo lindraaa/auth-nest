@@ -9,7 +9,7 @@ import { CreatePostDto } from './dto/create-post.dto';
 import { UpdatePostDto } from './dto/update-post.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from '../users/entities/user.entity';
-import { IsNull, Repository } from 'typeorm';
+import { In, IsNull, Repository } from 'typeorm';
 import { Post } from './entities/post.entity';
 import { ApiRResponse, createResponse } from 'src/shared/utils/response.util';
 import { instanceToInstance } from 'class-transformer';
@@ -91,7 +91,7 @@ export class PostService {
   async findAllPost(user_id: number): Promise<ApiRResponse<User>> {
     const postByUser = await this.usersRepository.findOne({
       where: { id: user_id },
-      relations: ['posts'],
+      relations: ['posts', 'posts.images'],
     });
 
     if (!postByUser) throw new NotFoundException('User not found ');
@@ -116,8 +116,12 @@ export class PostService {
   async update(
     id: number,
     updatePostDto: UpdatePostDto,
+    images?: Array<Express.Multer.File>,
   ): Promise<ApiRResponse<Post | null>> {
-    const post = await this.postRepository.findOneBy({ id });
+    const post = await this.postRepository.findOne({
+      where: { id },
+      relations: ['images'],
+    });
     if (!post) throw new NotFoundException('Post not found');
     const userId = this.requestContext.getUserId();
     if (!userId) throw new UnauthorizedException('User not authenticated');
@@ -127,7 +131,27 @@ export class PostService {
     };
     const data = await this.postRepository.merge(post, updateData);
     await this.postRepository.save(data);
-    return createResponse('success', 'Update Post Succeffully', data);
+    //Delete images
+    const delete_images = updatePostDto.delete_images;
+    if (delete_images?.length) {
+      console.log(delete_images);
+      await this.imageRepository.softDelete({ id: In(delete_images) });
+    }
+    //Add images
+    if (images?.length) {
+      for (const img of images) {
+        await this.imageRepository.save({
+          post_id: post.id,
+          file_path: img.path,
+          file_name: img.originalname,
+        });
+      }
+    }
+    const updatePost = await this.postRepository.findOne({
+      where: { id },
+      relations: ['images'],
+    });
+    return createResponse('success', 'Update Post Succeffully', updatePost);
   }
 
   async remove(id: number): Promise<ApiRResponse<void>> {
