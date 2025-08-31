@@ -25,7 +25,8 @@ import { FilesInterceptor } from '@nestjs/platform-express';
 import { diskStorage } from 'multer';
 import { ImageValidationPipe } from '../upload/image-validation/image-validation.pipe';
 import { storage } from 'src/config/storage.config';
-
+import { ApiBearerAuth } from '@nestjs/swagger';
+@ApiBearerAuth()
 @Controller('api/v1/post')
 export class PostController {
   constructor(private readonly postService: PostService) {}

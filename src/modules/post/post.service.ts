@@ -46,7 +46,7 @@ export class PostService {
       defaultSortBy: [['id', 'DESC']],
       defaultLimit: 10,
       searchableColumns: ['title', 'content'],
-      // relations: ['user', 'images'],
+      relations: ['images'],
     });
     return createResponse('success', 'list of Posts', response);
   }
