@@ -3,9 +3,18 @@ import { DataSource } from 'typeorm';
 
 export async function PostSeeders(dataSource: DataSource) {
   const postRepository = dataSource.getRepository(Post);
-  console.log('Seeding Post');
+  console.log('🧹 Clearing posts table...');
+  try {
+    await dataSource.query('SET FOREIGN_KEY_CHECKS = 0;');
+    await postRepository.clear();
+    await dataSource.query('SET FOREIGN_KEY_CHECKS = 1;');
+  } catch (error) {
+    console.error('Error Clearing Post table', error);
+  } finally {
+    console.log('✅ Post table cleared successfully');
+  }
 
-  const posts = [
+  const post = [
     {
       title: 'Post 1 ',
       content: 'The content',
@@ -22,16 +31,6 @@ export async function PostSeeders(dataSource: DataSource) {
       user_id: 3,
     },
   ];
-  for (const post of posts) {
-    const existPost = await postRepository.findOne({
-      where: { title: post.title },
-    });
-    if (!existPost) {
-      await postRepository.save(post);
-      console.log(`✅ Post"${post.title}" created`);
-    } else {
-      console.log(`⚠️  Post"${post.title}" already exists`);
-    }
-  }
+  await postRepository.save(post);
   console.log('Posts seeding finished');
 }
