@@ -7,9 +7,9 @@
 
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
 
-# auth-nest
+# Auth-nest
 
-A NestJS-based authentication example and starter project. This repository demonstrates a modular authentication system including JWT and token-based auth, user management, file uploads, simple post resources, and request-scoped context handling. The current branch adds OAuth2-related work (feature/oauth2).
+A NestJS-based authentication example and starter project. This repository demonstrates a modular authentication system including JWT and token-based auth, user management, file uploads, simple post resources, and request-scoped context handling.
 
 ## Highlights
 
@@ -40,9 +40,8 @@ A NestJS-based authentication example and starter project. This repository demon
 1. Install dependencies
 
 ```bash
-npm install
-# or
-# yarn install
+yarn install
+
 ```
 
 2. Provide configuration
@@ -59,15 +58,6 @@ npm run start:dev
 
 There is a seeder runner at `src/database/seeders/run-seeder.ts`. Run it with ts-node or a project script if one exists to populate sample users and posts for local development.
 
-## Tests
-
-Run unit and e2e tests with the project's test scripts (if present):
-
-```bash
-npm run test
-npm run test:e2e
-```
-
 ## Notable scripts
 
 Check `package.json` for exact npm scripts. Typical commands in this repository are: `start`, `start:dev`, `build`, `test`, and `lint`.
@@ -78,15 +68,3 @@ Check `package.json` for exact npm scripts. Typical commands in this repository 
 - Token-based auth and personal access tokens are implemented under `src/modules/auth` and `entities`.
 - Ownership and role guards live under module `guards/` directories.
 - Uploaded files are stored in the `uploads/` folder by default (see `src/config/storage.config.ts`).
-
-## Contributing
-
-Contributions are welcome. Please open issues for bugs or feature requests and send pull requests for fixes or improvements.
-
-## License
-
-This project does not include an explicit license file in the repository. Add a `LICENSE` file if you want to specify one (MIT is common for examples).
-
----
-
-If you'd like, I can also add an example `.env.example` file and a short `Makefile`/npm script to run the seeders and start the app with sensible defaults.
