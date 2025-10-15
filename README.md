@@ -6,63 +6,87 @@
 [circleci-url]: https://circleci.com/gh/nestjs/nest
 
   <p align="center">A progressive <a href="http://nodejs.org" target="_blank">Node.js</a> framework for building efficient and scalable server-side applications.</p>
-    <p align="center">
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/v/@nestjs/core.svg" alt="NPM Version" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/l/@nestjs/core.svg" alt="Package License" /></a>
-<a href="https://www.npmjs.com/~nestjscore" target="_blank"><img src="https://img.shields.io/npm/dm/@nestjs/common.svg" alt="NPM Downloads" /></a>
-<a href="https://circleci.com/gh/nestjs/nest" target="_blank"><img src="https://img.shields.io/circleci/build/github/nestjs/nest/master" alt="CircleCI" /></a>
-<a href="https://discord.gg/G7Qnnhy" target="_blank"><img src="https://img.shields.io/badge/discord-online-brightgreen.svg" alt="Discord"/></a>
-<a href="https://opencollective.com/nest#backer" target="_blank"><img src="https://opencollective.com/nest/backers/badge.svg" alt="Backers on Open Collective" /></a>
-<a href="https://opencollective.com/nest#sponsor" target="_blank"><img src="https://opencollective.com/nest/sponsors/badge.svg" alt="Sponsors on Open Collective" /></a>
-  <a href="https://paypal.me/kamilmysliwiec" target="_blank"><img src="https://img.shields.io/badge/Donate-PayPal-ff3f59.svg" alt="Donate us"/></a>
-    <a href="https://opencollective.com/nest#sponsor"  target="_blank"><img src="https://img.shields.io/badge/Support%20us-Open%20Collective-41B883.svg" alt="Support us"></a>
-  <a href="https://twitter.com/nestframework" target="_blank"><img src="https://img.shields.io/twitter/follow/nestframework.svg?style=social&label=Follow" alt="Follow us on Twitter"></a>
-</p>
-  <!--[![Backers on Open Collective](https://opencollective.com/nest/backers/badge.svg)](https://opencollective.com/nest#backer)
-  [![Sponsors on Open Collective](https://opencollective.com/nest/sponsors/badge.svg)](https://opencollective.com/nest#sponsor)-->
 
-## Description
+# auth-nest
 
-CRUD API with Roles, Upload & Swagger
+A NestJS-based authentication example and starter project. This repository demonstrates a modular authentication system including JWT and token-based auth, user management, file uploads, simple post resources, and request-scoped context handling. The current branch adds OAuth2-related work (feature/oauth2).
 
-📌 Overview
+## Highlights
 
-A NestJS API with:
+- Modular NestJS app: `auth`, `users`, `post`, `upload`, `request-context`, and shared utilities
+- Authentication features: password hashing, JWTs, personal access tokens, guards and decorators
+- File uploads with validation and storage configuration
+- Database configuration and seeders (see `database/seeders`)
+- Middleware and request context support for per-request data
 
-User CRUD + roles (admin, user)
+## Project structure (important folders)
 
-Posts with multiple image uploads (Multer)
+- `src/modules/auth` — authentication controllers, services, guards, and decorators
+- `src/modules/users` — user CRUD and related DTOs/entities
+- `src/modules/post` — example Post resource with ownership guard
+- `src/modules/upload` — upload endpoint, validation pipe, and storage config
+- `src/config` — centralized configuration (database, storage)
+- `src/database/seeders` — seeding scripts to populate dev data
+- `src/request-context` — request-scoped context and interceptor
 
-Guards (users delete own posts, admin can delete any)
+## Requirements
 
-Swagger docs at /api/docs
+- Node.js (LTS recommended)
+- npm or yarn
+- A database supported by the project's configuration (see `src/config/database.config.ts`)
 
-🚀 Features
+## Quick start
 
-Auth → Register & Login (JWT)
-
-Users → Manage profiles & roles
-
-Posts → Create, list, delete (with images)
-
-Uploads → Store images linked to posts
-
-Guards → Role & ownership-based access
-
-## Project setup
+1. Install dependencies
 
 ```bash
-$ yarn install
-$ yarn seed:all
+npm install
+# or
+# yarn install
 ```
 
-## Compile and run the project
+2. Provide configuration
+
+Copy or create environment variables required by the app. Configuration keys are read from the files in `src/config`. Common variables include database connection values and JWT secret/key. For development you can set these in your shell or a `.env` file that your environment loader reads.
+
+3. Run the app in development
 
 ```bash
+npm run start:dev
+```
 
-$ yarn run start:dev
+4. Seed the database (optional)
 
-#
+There is a seeder runner at `src/database/seeders/run-seeder.ts`. Run it with ts-node or a project script if one exists to populate sample users and posts for local development.
 
+## Tests
 
+Run unit and e2e tests with the project's test scripts (if present):
 
+```bash
+npm run test
+npm run test:e2e
+```
+
+## Notable scripts
+
+Check `package.json` for exact npm scripts. Typical commands in this repository are: `start`, `start:dev`, `build`, `test`, and `lint`.
+
+## Development notes
+
+- Check `src/modules/auth/hashing/bcrypt.service.ts` for how passwords are hashed.
+- Token-based auth and personal access tokens are implemented under `src/modules/auth` and `entities`.
+- Ownership and role guards live under module `guards/` directories.
+- Uploaded files are stored in the `uploads/` folder by default (see `src/config/storage.config.ts`).
+
+## Contributing
+
+Contributions are welcome. Please open issues for bugs or feature requests and send pull requests for fixes or improvements.
+
+## License
+
+This project does not include an explicit license file in the repository. Add a `LICENSE` file if you want to specify one (MIT is common for examples).
+
+---
+
+If you'd like, I can also add an example `.env.example` file and a short `Makefile`/npm script to run the seeders and start the app with sensible defaults.
